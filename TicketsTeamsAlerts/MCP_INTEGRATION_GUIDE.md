@@ -4,9 +4,8 @@
 This system monitors Azure DevOps escalation queries in real-time and automatically routes alerts to the appropriate Teams channels based on service detection.
 
 ## Files
-- `production_monitor.py` - Production-ready monitor with MCP integration
-- `mcp_realtime_monitor.py` - Testing version with simulation
-- Individual service monitors: `atlas_escalations.py`, `snowflake_escalations.py`, `salesforce_escalations.py`
+- `escalation_monitor.py` - Production-ready monitor with MCP integration
+- `test_escalation_monitor.py` - Testing version with simulation
 
 ## MCP Integration Requirements
 
@@ -120,4 +119,4 @@ The system provides detailed logging:
 ```
 
 ## Testing
-Use `mcp_realtime_monitor.py` for testing without MCP tools. It includes simulation data and validates the complete workflow.
+Use `test_escalation_monitor.py` for testing without MCP tools. It includes simulation data and validates the complete workflow.

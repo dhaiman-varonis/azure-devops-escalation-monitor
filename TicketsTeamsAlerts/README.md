@@ -13,9 +13,11 @@ A comprehensive real-time monitoring system that automatically detects Azure Dev
 ## 📁 Files
 
 ### Core Files
-- **`mcp_realtime_monitor.py`** - Main production-ready monitor with platform-only detection
-- **`production_monitor.py`** - Alternative production version with enhanced MCP integration
-- **`webhook_tester.py`** - Utility for testing Teams webhook URLs
+## Files Overview
+
+- **`escalation_monitor.py`** - Production-ready monitor (requires MCP environment)
+- **`test_escalation_monitor.py`** - Testing version with simulation data  
+- **`webhook_tester.py`** - Utility to test Teams webhook connectivity
 - **`MCP_INTEGRATION_GUIDE.md`** - Complete deployment and configuration guide
 
 ## 🎯 Service Detection
@@ -57,14 +59,21 @@ self.webhooks = {
 python webhook_tester.py
 ```
 
-#### Single Check
+### Testing/Development (No MCP Required)
 ```bash
-python mcp_realtime_monitor.py
-```
+python test_escalation_monitor.py
 
-#### Continuous Monitoring (Production)
+# For continuous testing (checks every 5 minutes)
+python test_escalation_monitor.py --continuous 5
+
+#### Production (with MCP)
 ```bash
-python mcp_realtime_monitor.py --continuous 5  # Check every 5 minutes
+### Production Use (Requires MCP Environment)
+```bash
+python escalation_monitor.py
+
+# For continuous monitoring (checks every 5 minutes)
+python escalation_monitor.py --continuous 5
 ```
 
 ## 📊 Sample Output

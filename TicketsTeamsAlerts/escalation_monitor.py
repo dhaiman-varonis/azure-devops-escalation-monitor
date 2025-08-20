@@ -46,134 +46,47 @@ class RealTimeEscalationMonitor:
     def get_live_escalations_mcp(self):
         """
         Get live escalation data from Azure DevOps using MCP tools
-        Note: This function shows the structure for MCP integration
-        In actual implementation, you would import and use the MCP tools directly
         """
         try:
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Fetching live escalations from Azure DevOps...")
             
-            # TODO: Replace this with actual MCP calls when running in MCP environment
-            # from mcp_tools import mcp_ado_wit_get_query_results_by_id, mcp_ado_wit_get_work_items_batch_by_ids
+            # Import MCP tools - these should be available in MCP environment
+            try:
+                from mcp_ado_wit_get_query_results_by_id import mcp_ado_wit_get_query_results_by_id
+                from mcp_ado_wit_get_work_items_batch_by_ids import mcp_ado_wit_get_work_items_batch_by_ids
+            except ImportError:
+                if not self.mcp_available:
+                    print("❌ MCP tools not available - this script requires MCP environment")
+                    print("💡 For testing without MCP, use: python test_escalation_monitor.py")
+                    return []
             
-            # For now, simulate the MCP call structure
-            print("⚠️  Using simulated data - integrate with actual MCP tools for production")
+            # Get query results
+            query_response = mcp_ado_wit_get_query_results_by_id(
+                id=self.query_id,
+                project=self.project
+            )
             
-            # This is what the actual MCP call would look like:
-            # query_response = mcp_ado_wit_get_query_results_by_id(
-            #     id=self.query_id,
-            #     project=self.project
-            # )
-            
-            escalations_data = self._simulate_mcp_query_response()
-            
-            if not escalations_data or not escalations_data.get('workItems'):
+            if not query_response or not query_response.get('workItems'):
                 print("No escalations found or query failed")
                 return None, []
             
-            work_item_ids = [item['id'] for item in escalations_data['workItems']]
+            work_item_ids = [item['id'] for item in query_response['workItems']]
             print(f"Found {len(work_item_ids)} escalation work items")
             
-            # This is what the actual MCP call would look like:
-            # detailed_response = mcp_ado_wit_get_work_items_batch_by_ids(
-            #     project=self.project,
-            #     ids=work_item_ids
-            # )
-            # detailed_tickets = detailed_response.get('value', [])
+            # Get detailed work item information
+            detailed_response = mcp_ado_wit_get_work_items_batch_by_ids(
+                project=self.project,
+                ids=work_item_ids
+            )
             
-            detailed_tickets = self._simulate_mcp_work_items_response(work_item_ids)
+            detailed_tickets = detailed_response.get('value', []) if detailed_response else []
             print(f"Retrieved details for {len(detailed_tickets)} work items")
             
-            return escalations_data, detailed_tickets
+            return query_response, detailed_tickets
             
         except Exception as e:
             print(f"Error fetching escalations: {e}")
             return None, []
-    
-    def _simulate_mcp_query_response(self):
-        """Simulate MCP query response structure"""
-        return {
-            "queryType": 1,
-            "queryResultType": 1, 
-            "asOf": datetime.now().isoformat() + "Z",
-            "columns": [
-                {"referenceName": "VaronisSupport.SupportTicket.TicketNumber", "name": "TicketNumber"},
-                {"referenceName": "System.Title", "name": "Title"},
-                {"referenceName": "VaronisSupport.SupportTicket.Platform", "name": "Platform"}
-            ],
-            "workItems": [
-                {"id": 2360781}, {"id": 2360768}, {"id": 2360760}, {"id": 2360743}, 
-                {"id": 2360680}, {"id": 2360167}, {"id": 2360155}, {"id": 2360151}
-            ]
-        }
-    
-    def _simulate_mcp_work_items_response(self, work_item_ids):
-        """Simulate MCP work items batch response"""
-        # Real ticket examples based on actual Azure DevOps data
-        all_tickets = [
-            {
-                "id": 2360743,
-                "fields": {
-                    "System.Id": 2360743,
-                    "System.WorkItemType": "Support ticket",
-                    "System.State": "New",
-                    "System.AssignedTo": "Sharon Raz <sraz@varonis.com>",
-                    "System.Title": "[Ticket #0934994] Salesforce integration failing to add permission set to user @ Interface @ (RSE-US)",
-                    "VaronisSupport.SupportTicket.CustomerName": "Interface",
-                    "VaronisSupport.SupportTicket.TicketNumber": "0934994",
-                    "VaronisSupport.SupportTicket.Platform": "Salesforce",
-                    "Microsoft.VSTS.Common.Severity": "2 - High",
-                    "System.CreatedDate": "2025-08-20T18:30:00Z"
-                }
-            },
-            {
-                "id": 2360167,
-                "fields": {
-                    "System.Id": 2360167,
-                    "System.WorkItemType": "Support ticket",
-                    "System.State": "New", 
-                    "System.AssignedTo": "Lev Gervich <lgervich@varonis.com>",
-                    "System.Title": "[Ticket #0934821] Snowflake scope template suddenly missing @ VS Services Company, LLC @ (AMER) @ EVAL",
-                    "VaronisSupport.SupportTicket.CustomerName": "VS Services Company, LLC",
-                    "VaronisSupport.SupportTicket.TicketNumber": "0934821",
-                    "VaronisSupport.SupportTicket.Platform": "Snowflake",
-                    "Microsoft.VSTS.Common.Severity": "3 - Medium",
-                    "System.CreatedDate": "2025-08-20T16:15:00Z"
-                }
-            },
-            {
-                "id": 2360151,
-                "fields": {
-                    "System.Id": 2360151,
-                    "System.WorkItemType": "Support ticket",
-                    "System.State": "New",
-                    "System.AssignedTo": "Philip Patrick <patrickp@varonis.com>",
-                    "System.Title": "[Ticket #0934708] Atlas dashboards loading slowly @ VS Services Company, LLC @ (AMER) @ EVAL",
-                    "VaronisSupport.SupportTicket.CustomerName": "VS Services Company, LLC", 
-                    "VaronisSupport.SupportTicket.TicketNumber": "0934708",
-                    "VaronisSupport.SupportTicket.Platform": "MongoDB",
-                    "Microsoft.VSTS.Common.Severity": "2 - High",
-                    "System.CreatedDate": "2025-08-20T14:20:00Z"
-                }
-            },
-            {
-                "id": 2360760,
-                "fields": {
-                    "System.Id": 2360760,
-                    "System.WorkItemType": "Support ticket",
-                    "System.State": "New",
-                    "System.AssignedTo": "Arnon Silverman <asilverman@varonis.com>",
-                    "System.Title": "[Ticket #0934814] Atlas file analysis fails @ VS Services Company, LLC @ (AMER) @ EVAL",
-                    "VaronisSupport.SupportTicket.CustomerName": "VS Services Company, LLC",
-                    "VaronisSupport.SupportTicket.TicketNumber": "0934814",
-                    "VaronisSupport.SupportTicket.Platform": "MongoDB",
-                    "Microsoft.VSTS.Common.Severity": "2 - High",
-                    "System.CreatedDate": "2025-08-20T12:45:00Z"
-                }
-            }
-        ]
-        
-        # Return only tickets that match the requested IDs
-        return [ticket for ticket in all_tickets if ticket['id'] in work_item_ids]
     
     def detect_service_type(self, ticket):
         """Platform-based service detection only"""
@@ -328,11 +241,44 @@ class RealTimeEscalationMonitor:
         
         print(f"📊 Processed {processed_count} new tickets, sent {alerts_sent} service alerts")
         return alerts_sent
+    
+    def run_continuous(self, interval_minutes=5):
+        """Run continuous monitoring"""
+        print("🔄 Starting continuous monitoring...")
+        print(f"⏰ Check interval: {interval_minutes} minutes")
+        print("Press Ctrl+C to stop")
+        print()
+        
+        cycle = 0
+        try:
+            while True:
+                cycle += 1
+                print(f"🔄 Cycle #{cycle} - {datetime.now().strftime('%H:%M:%S')}")
+                
+                alerts_sent = self.process_escalations()
+                
+                if alerts_sent > 0:
+                    print(f"🎉 Cycle #{cycle} complete - {alerts_sent} alerts sent")
+                else:
+                    print(f"✅ Cycle #{cycle} complete - no new escalations")
+                
+                print(f"😴 Waiting {interval_minutes} minutes...\n")
+                time.sleep(interval_minutes * 60)
+                
+        except KeyboardInterrupt:
+            print("🛑 Monitoring stopped by user")
 
 def main():
     """Main execution function"""
     monitor = RealTimeEscalationMonitor()
     
+    # Check for continuous mode
+    if len(sys.argv) > 1 and sys.argv[1] == '--continuous':
+        interval = int(sys.argv[2]) if len(sys.argv) > 2 else 5
+        monitor.run_continuous(interval)
+        return
+    
+    # Single check mode
     print("🚀 REAL-TIME ESCALATION MONITOR")
     print("=" * 50)
     print("📋 Query ID:", monitor.query_id)
