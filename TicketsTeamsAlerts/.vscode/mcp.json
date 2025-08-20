@@ -1,0 +1,26 @@
+{
+  "servers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "Azure DevOps - VaronisIO": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@azure-devops/mcp",
+        "VaronisIO",
+        "--tenant",
+        "080f3eaf-1e2e-4baf-8c3b-e36006ff4ee8"
+      ]
+    },
+    "Microsoft Teams": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@microsoft/teams.mcp"
+      ]
+    }
+  }
+}
